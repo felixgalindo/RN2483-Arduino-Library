@@ -13,33 +13,33 @@
 #include "Arduino.h"
 
 enum RN2xx3_t {
-  RN_NA = 0, // Not set
-  RN2903 = 2903,
-  RN2483 = 2483
+    RN_NA = 0, // Not set
+    RN2903 = 2903,
+    RN2483 = 2483
 };
 
 enum FREQ_PLAN {
-  SINGLE_CHANNEL_EU,
-  TTN_EU,
-  TTN_US,
-  DEFAULT_EU
+    SINGLE_CHANNEL_EU,
+    TTN_EU,
+    TTN_US,
+    DEFAULT_EU
 };
 
 enum TX_RETURN_TYPE {
-  TX_FAIL = 0,    // The transmission failed.
-                  // If you sent a confirmed message and it is not acked,
-                  // this will be the returned value.
+    TX_FAIL = 0,    // The transmission failed.
+    // If you sent a confirmed message and it is not acked,
+    // this will be the returned value.
 
-  TX_SUCCESS = 1, // The transmission was successful.
-                  // Also the case when a confirmed message was acked.
+    TX_SUCCESS = 1, // The transmission was successful.
+    // Also the case when a confirmed message was acked.
 
-  TX_WITH_RX = 2  // A downlink message was received after the transmission.
-                  // This also implies that a confirmed message is acked.
+    TX_WITH_RX = 2  // A downlink message was received after the transmission.
+                 // This also implies that a confirmed message is acked.
 };
 
 class rn2xx3
 {
-  public:
+public:
 
     /*
      * A simplified constructor taking only a Stream ({Software/Hardware}Serial) object.
@@ -124,7 +124,7 @@ class rn2xx3
      * they will be used. Otherwise the join will fail and this function
      * will return false.
      */
-    bool initOTAA(String AppEUI="", String AppKey="", String DevEUI="");
+    bool initOTAA(String AppEUI = "", String AppKey = "", String DevEUI = "");
 
     /*
      * Initialise the RN2xx3 and join a network using over the air activation,
@@ -135,7 +135,17 @@ class rn2xx3
      * AppKey: Application key as a uint8_t buffer
      * DevEui: Device EUI as a uint8_t buffer (optional - set to 0 to use Hardware EUI)
      */
-     bool initOTAA(uint8_t * AppEUI, uint8_t * AppKey, uint8_t * DevEui);
+    bool initOTAA(uint8_t * AppEUI, uint8_t * AppKey, uint8_t * DevEui);
+
+
+    /*
+    * Joins via OTAA only initializing AppEUI,AppKey, and DevEui settings 
+    *
+    * AppEUI: Application EUI as a uint8_t buffer
+    * AppKey: Application key as a uint8_t buffer
+    * DevEui: Device EUI as a uint8_t buffer (optional - set to 0 to use Hardware EUI)
+    */
+    bool joinOTAA(String AppEUI, String AppKey, String DevEUI);
 
     /*
      * Transmit the provided data. The data is hex-encoded by this library,
@@ -234,7 +244,7 @@ class rn2xx3
      */
     String base16decode(String);
 
-  private:
+private:
     Stream& _serial;
 
     RN2xx3_t _moduleType = RN_NA;

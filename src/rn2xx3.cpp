@@ -219,6 +219,73 @@ bool rn2xx3::initOTAA(String AppEUI, String AppKey, String DevEUI)
   return joined;
 }
 
+bool rn2xx3::joinOTAA(String AppEUI, String AppKey, String DevEUI)
+{
+  _otaa = true;
+  _nwkskey = "0";
+  String receivedData;
+
+  //clear serial buffer
+  while(_serial.available())
+    _serial.read();
+
+  // If the Device EUI was given as a parameter, use it
+  // otherwise use the Hardware EUI.
+  if (DevEUI.length() == 16)
+  {
+    _deveui = DevEUI;
+  }
+  else
+  {
+    String addr = sendRawCommand(F("sys get hweui"));
+    if( addr.length() == 16 )
+    {
+      _deveui = addr;
+    }
+    // else fall back to the hard coded value in the header file
+  }
+
+  sendRawCommand("mac set deveui "+_deveui);
+
+  // A valid length App EUI was given. Use it.
+  if ( AppEUI.length() == 16 )
+  {
+      _appeui = AppEUI;
+      sendRawCommand("mac set appeui "+_appeui);
+  }
+
+  // A valid length App Key was give. Use it.
+  if ( AppKey.length() == 32 )
+  {
+    _appskey = AppKey; //reuse the same variable as for ABP
+    sendRawCommand("mac set appkey "+_appskey);
+  }
+
+  _serial.setTimeout(30000);
+  sendRawCommand(F("mac save"));
+
+  bool joined = false;
+
+  // Only try twice to join, then return and let the user handle it.
+  for(int i=0; i<2 && !joined; i++)
+  {
+    sendRawCommand(F("mac join otaa"));
+    // Parse 2nd response
+    receivedData = _serial.readStringUntil('\n');
+
+    if(receivedData.startsWith("accepted"))
+    {
+      joined=true;
+      delay(1000);
+    }
+    else
+    {
+      delay(1000);
+    }
+  }
+  _serial.setTimeout(2000);
+  return joined;
+}
 
 bool rn2xx3::initOTAA(uint8_t * AppEUI, uint8_t * AppKey, uint8_t * DevEUI)
 {
@@ -605,6 +672,7 @@ void rn2xx3::sleep(long msec)
 
 String rn2xx3::sendRawCommand(String command)
 {
+  Serial.println("Cmd:" + command);
   delay(100);
   while(_serial.available())
     _serial.read();
@@ -612,8 +680,7 @@ String rn2xx3::sendRawCommand(String command)
   String ret = _serial.readStringUntil('\n');
   ret.trim();
 
-  //TODO: Add debug print
-
+  Serial.println("Resp:" + ret);
   return ret;
 }
 
