@@ -139,7 +139,7 @@ public:
 
 
     /*
-    * Joins via OTAA only initializing AppEUI,AppKey, and DevEui settings 
+    * Joins via OTAA only initializing AppEUI,AppKey, and DevEui settings
     *
     * AppEUI: Application EUI as a uint8_t buffer
     * AppKey: Application key as a uint8_t buffer
@@ -243,6 +243,16 @@ public:
      * string received from the RN2xx3.
      */
     String base16decode(String);
+
+    /*
+    * Attempt at a new txCommand function that only tries to send once without retries or rejoining network
+    *
+    * String - the tx command to send
+            can only be one of "mac tx cnf 1 " or "mac tx uncnf 1 "
+    * String - an ascii text string if bool is true. A HEX string if bool is false.
+    * bool - should the data string be hex encoded or not
+    */
+    TX_RETURN_TYPE txCommand2(String command, String data, bool shouldEncode);
 
 private:
     Stream& _serial;
